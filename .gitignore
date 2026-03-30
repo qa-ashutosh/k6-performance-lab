@@ -1,0 +1,11 @@
+# k6 output files
+*.json
+results/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
