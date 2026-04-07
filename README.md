@@ -16,10 +16,10 @@ Performance testing suite built with [Grafana k6](https://k6.io/) targeting the 
 |------|------|--------|
 | Smoke | `tests/smoke-test.js` | ✅ Ready |
 | Load | `tests/load-test.js` | ✅ Ready |
-| Stress | `tests/stress-test.js` | 🔜 Coming |
-| Spike | `tests/spike-test.js` | 🔜 Coming |
+| Stress | `tests/stress-test.js` | ✅ Ready |
+| Spike | `tests/spike-test.js` | ✅ Ready |
+| Breakpoint | `tests/breakpoint-test.js` | ✅ Ready |
 | Soak | `tests/soak-test.js` | 🔜 Coming |
-| Breakpoint | `tests/breakpoint-test.js` | 🔜 Coming |
 
 ## Getting Started
 
