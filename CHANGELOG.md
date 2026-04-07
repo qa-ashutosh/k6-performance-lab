@@ -7,6 +7,24 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.2.0] - 2025-04-07
+ 
+### Added
+- `tests/stress-test.js` — ramps to 200 VUs across 5 stages to identify performance degradation point
+- `tests/spike-test.js` — simulates sudden traffic burst from 10 to 200 VUs to test spike recovery
+- `tests/breakpoint-test.js` — continuously ramps to 300 VUs to find absolute system capacity limit
+ 
+### Fixed
+- `config/options.js` — added missing thresholds to `loadOptions` (`p(95)<2000`, `p(99)<3000`, error rate `<5%`)
+ 
+### Notes
+- Auth token still hardcoded as placeholder across all test files — to be moved to env config in v0.3.0
+- HTTP request logic duplicated across test files — reusable utils planned for v0.3.0
+- Soak test not yet implemented
+- Breakpoint test should not be run in CI — manual execution only
+ 
+---
+
 ## [0.1.0] - 2025-03-30
 
 ### Added
