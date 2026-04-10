@@ -1,8 +1,6 @@
 // config/options.js
-// Shared k6 options for all test types.
-// TODO: extract hardcoded values to env variables in next refactor
-
-export const BASE_URL = "http://localhost:3333";
+// Shared k6 test options for all test types.
+// BASE_URL moved to config/env.js as part of env config refactor.
 
 // --- SMOKE ---
 // Quick sanity check — minimal VUs, short duration
@@ -30,14 +28,14 @@ export const loadOptions = {
 };
 
 // --- STRESS ---
-// Push beyond normal load to find the breaking point threshold
+// Push beyond normal load to find performance degradation point
 export const stressOptions = {
   stages: [
-    { duration: "1m", target: 50 },
+    { duration: "1m", target: 50  },
     { duration: "2m", target: 100 },
     { duration: "2m", target: 150 },
     { duration: "2m", target: 200 },
-    { duration: "1m", target: 0 },
+    { duration: "1m", target: 0   },
   ],
   thresholds: {
     http_req_failed: ["rate<0.10"],
@@ -49,11 +47,11 @@ export const stressOptions = {
 // Sudden burst of traffic — simulates flash sale / viral event
 export const spikeOptions = {
   stages: [
-    { duration: "30s", target: 10 },   // baseline
-    { duration: "30s", target: 200 },  // sudden spike
-    { duration: "1m",  target: 200 },  // hold spike
-    { duration: "30s", target: 10 },   // back to baseline
-    { duration: "30s", target: 0 },    // ramp down
+    { duration: "30s", target: 10  },
+    { duration: "30s", target: 200 },
+    { duration: "1m",  target: 200 },
+    { duration: "30s", target: 10  },
+    { duration: "30s", target: 0   },
   ],
   thresholds: {
     http_req_failed: ["rate<0.20"],
@@ -62,18 +60,33 @@ export const spikeOptions = {
 };
 
 // --- BREAKPOINT ---
-// Continuously ramp up until system breaks — find the absolute limit
-// Run manually only — not part of CI
+// Continuously ramp up until system breaks — find absolute limit
+// ⚠️  Run manually only — not part of CI
 export const breakpointOptions = {
   stages: [
-    { duration: "2m", target: 50   },
-    { duration: "2m", target: 100  },
-    { duration: "2m", target: 150  },
-    { duration: "2m", target: 200  },
-    { duration: "2m", target: 250  },
-    { duration: "2m", target: 300  },
+    { duration: "2m", target: 50  },
+    { duration: "2m", target: 100 },
+    { duration: "2m", target: 150 },
+    { duration: "2m", target: 200 },
+    { duration: "2m", target: 250 },
+    { duration: "2m", target: 300 },
   ],
   thresholds: {
     http_req_failed: ["rate<0.30"],
+  },
+};
+
+// --- SOAK ---
+// Long duration test at moderate load — catches memory leaks and degradation over time
+// ⚠️  Placeholder — full implementation coming in next stage
+export const soakOptions = {
+  stages: [
+    { duration: "2m",  target: 50 },
+    { duration: "30m", target: 50 },
+    { duration: "2m",  target: 0  },
+  ],
+  thresholds: {
+    http_req_failed: ["rate<0.05"],
+    http_req_duration: ["p(95)<2000"],
   },
 };

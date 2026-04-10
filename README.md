@@ -1,71 +1,161 @@
 # k6 Performance Lab
 
-Performance testing suite built with [Grafana k6](https://k6.io/) targeting the [QuickPizza](https://github.com/grafana/quickpizza) demo application.
+A professional performance testing suite built with [Grafana k6](https://k6.io/), targeting the [QuickPizza](https://github.com/grafana/quickpizza) demo application. Covers all major performance test types with a clean, modular structure and real observability tooling.
 
 ## Tech Stack
 
-- **k6** — performance test scripting and execution
-- **QuickPizza** — target application (Grafana's official k6 demo app)
-- **InfluxDB** — stores k6 metrics output
-- **Grafana** — visualizes metrics in real-time dashboards
-- **Docker** — runs the full stack locally
+| Tool | Purpose |
+|------|---------|
+| **k6** | Performance test scripting and execution |
+| **QuickPizza** | Target application under test (Grafana's official k6 demo app) |
+| **InfluxDB** | Stores k6 metrics output |
+| **Grafana** | Visualizes metrics in real-time dashboards |
+| **Docker** | Runs the full local stack |
 
-## Test Types (in progress)
+---
 
-| Test | File | Status |
-|------|------|--------|
-| Smoke | `tests/smoke-test.js` | ✅ Ready |
-| Load | `tests/load-test.js` | ✅ Ready |
-| Stress | `tests/stress-test.js` | ✅ Ready |
-| Spike | `tests/spike-test.js` | ✅ Ready |
-| Breakpoint | `tests/breakpoint-test.js` | ✅ Ready |
-| Soak | `tests/soak-test.js` | 🔜 Coming |
+## Test Types
+
+| Test | File | VUs | Purpose |
+|------|------|-----|---------|
+| Smoke | `tests/smoke-test.js` | 5 | Sanity check — is the system up and responding? |
+| Load | `tests/load-test.js` | 50 | Normal + peak traffic simulation |
+| Stress | `tests/stress-test.js` | 200 | Push beyond normal load to find degradation point |
+| Spike | `tests/spike-test.js` | 200 | Sudden traffic burst — flash sale / viral event |
+| Breakpoint | `tests/breakpoint-test.js` | 300 | Find absolute system capacity limit ⚠️ manual only |
+| Soak | `tests/soak-test.js` | 50 | Long duration endurance test 🔜 coming |
+
+---
+
+## Project Structure
+
+```
+k6-performance-lab/
+├── docker-compose.yml       # Full local stack (QuickPizza + InfluxDB + Grafana)
+├── run-tests.sh             # Shell wrapper — loads .env and runs k6
+├── .env.example             # Environment variable template
+├── config/
+│   ├── env.js               # Centralised env config with fallback defaults
+│   └── options.js           # Shared k6 options for all test types
+├── utils/
+│   ├── http-client.js       # Reusable HTTP request wrapper
+│   └── checks.js            # Shared k6 check functions
+└── tests/
+    ├── smoke-test.js
+    ├── load-test.js
+    ├── stress-test.js
+    ├── spike-test.js
+    └── breakpoint-test.js
+```
+
+---
 
 ## Getting Started
 
 ### Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- [k6](https://k6.io/docs/get-started/installation/)
+- [k6](https://k6.io/docs/get-started/installation/) — `brew install k6`
 
-### 1. Start the stack
+---
+
+### 1. Start the Docker stack
 
 ```bash
 docker compose up -d
 ```
 
-Wait ~10 seconds, then verify:
-- QuickPizza → http://localhost:3333
-- Grafana → http://localhost:3000
+Verify services are running:
 
-### 2. Run a smoke test
+| Service | URL |
+|---------|-----|
+| QuickPizza | http://localhost:3333 |
+| Grafana | http://localhost:3000 |
+| InfluxDB | http://localhost:8086 |
+
+---
+
+### 2. Get your Auth Token
+
+1. Open **http://localhost:3333**
+2. Click the user/profile icon in the top right
+3. Copy the token shown
+
+---
+
+### 3. Set up environment
 
 ```bash
-k6 run tests/smoke-test.js
+# Copy the template
+cp .env.example .env
 ```
 
-### 3. Run load test with InfluxDB output
+Edit `.env` and paste your token:
 
 ```bash
-k6 run --out influxdb=http://localhost:8086/k6 tests/load-test.js
+AUTH_TOKEN=your_token_here
+BASE_URL=http://localhost:3333
 ```
 
-### 4. Stop the stack
+---
+
+### 4. Make the run script executable (first time only)
+
+```bash
+chmod +x run-tests.sh
+```
+
+---
+
+### 5. Run tests
+
+```bash
+# Smoke test — quick sanity check
+./run-tests.sh tests/smoke-test.js
+
+# Load test
+./run-tests.sh tests/load-test.js
+
+# Stress test
+./run-tests.sh tests/stress-test.js
+
+# Spike test
+./run-tests.sh tests/spike-test.js
+
+# Breakpoint test (manual only — will stress your system)
+./run-tests.sh tests/breakpoint-test.js
+```
+
+---
+
+### 6. Run with InfluxDB output (for Grafana dashboard)
+
+```bash
+./run-tests.sh --out influxdb=http://localhost:8086/k6 tests/load-test.js
+./run-tests.sh --out influxdb=http://localhost:8086/k6 tests/stress-test.js
+```
+
+Then open Grafana at **http://localhost:3000** to visualize the metrics.
+
+---
+
+### 7. Stop the stack
 
 ```bash
 docker compose down
 ```
 
-## Project Structure
+---
 
-```
-k6-performance-lab/
-├── tests/              # k6 test scripts
-├── config/             # shared options and configuration
-├── docker-compose.yml  # full local stack
-└── README.md
-```
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BASE_URL` | `http://localhost:3333` | Base URL of the application under test |
+| `AUTH_TOKEN` | `` | Auth token for QuickPizza `/api/pizza` endpoint |
+| `TARGET_VUS` | `50` | Virtual user count override |
+| `DURATION` | `5m` | Test duration override |
 
 ---
 
-> More test types, Grafana dashboards, and CI integration coming in upcoming commits.
+> Grafana dashboard provisioning, soak test, and CI integration coming in upcoming commits.

@@ -1,47 +1,25 @@
 // tests/spike-test.js
-// Spike Test — simulates a sudden and extreme surge in traffic (e.g. flash sale,
-// viral event, marketing campaign drop). Jumps from 10 to 200 VUs instantly.
-// Watch for: error spikes, recovery behavior, whether system stabilizes after burst.
+// Spike Test — simulates sudden extreme traffic burst.
+// Jumps from 10 to 200 VUs instantly to test spike recovery.
+// Watch for: error spikes, whether system recovers after burst.
 
-import http from "k6/http";
-import { check, sleep } from "k6";
-import { spikeOptions, BASE_URL } from "../config/options.js";
+import { sleep } from "k6";
+import { spikeOptions } from "../config/options.js";
+import { get, post, defaultPizzaPayload } from "../utils/http-client.js";
+import { checkHomepage, checkPizzaResponse } from "../utils/checks.js";
 
 export const options = spikeOptions;
 
 export default function () {
-  // Step 1: Homepage check — does it hold during the spike?
-  const homeRes = http.get(`${BASE_URL}/`);
-  check(homeRes, {
-    "homepage survives spike": (r) => r.status === 200,
-  });
+  // Step 1: Homepage during spike
+  const homeRes = get("/");
+  checkHomepage(homeRes);
 
   sleep(1);
 
-  // Step 2: Core pizza request during spike
-  const payload = JSON.stringify({
-    maxCaloriesPerSlice: 1000,
-    mustBeVegetarian: false,
-    excludedIngredients: [],
-    excludedTools: [],
-    maxNumberOfToppings: 5,
-    minNumberOfToppings: 2,
-    customName: "",
-  });
-
-  const params = {
-    headers: {
-      "Content-Type": "application/json",
-      //   authorization: "<Auth-Token>", // --- REPLACE WITH VALID TOKEN ---
-      authorization: "Token xox2YtMP7j9W3inM", // --- REPLACE WITH VALID TOKEN ---
-    },
-  };
-
-  const pizzaRes = http.post(`${BASE_URL}/api/pizza`, payload, params);
-  check(pizzaRes, {
-    "pizza API survives spike": (r) => r.status === 200,
-    "response time during spike": (r) => r.timings.duration < 10000,
-  });
+  // Step 2: Pizza request during spike
+  const pizzaRes = post("/api/pizza", defaultPizzaPayload());
+  checkPizzaResponse(pizzaRes);
 
   sleep(1);
 }

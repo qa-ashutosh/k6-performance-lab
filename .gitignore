@@ -2,6 +2,9 @@
 *.json
 results/
 
+# Environment secrets — never commit real tokens
+.env
+
 # OS files
 .DS_Store
 Thumbs.db
