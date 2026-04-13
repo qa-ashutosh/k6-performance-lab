@@ -1,0 +1,14 @@
+# grafana-provisioning/dashboards/dashboard.yml
+# Auto-provisions the k6 dashboard in Grafana on startup.
+# Dashboard JSON lives in /dashboards/k6-dashboard.json.
+
+apiVersion: 1
+
+providers:
+  - name: k6-performance-lab
+    orgId: 1
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    options:
+      path: /var/lib/grafana/dashboards

@@ -28,6 +28,12 @@ services:
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      # Auto-provision InfluxDB datasource
+      - ./grafana-provisioning/datasources:/etc/grafana/provisioning/datasources
+      # Auto-provision k6 dashboard
+      - ./grafana-provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./dashboards:/var/lib/grafana/dashboards
     depends_on:
       - influxdb
     networks:
