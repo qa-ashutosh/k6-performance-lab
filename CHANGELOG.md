@@ -7,7 +7,7 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [0.4.0] - 2025-04-10
+## [0.4.0] - 2025-04-13
 
 ### Added
 - `tests/soak-test.js` — long duration endurance test (34 min at 50 VUs) to detect memory leaks and performance degradation over time
