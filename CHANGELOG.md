@@ -7,7 +7,27 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [0.3.0] - 2025-04-10
+## [0.4.0] - 2025-04-10
+
+### Added
+- `tests/soak-test.js` — long duration endurance test (34 min at 50 VUs) to detect memory leaks and performance degradation over time
+- `dashboards/k6-dashboard.json` — importable Grafana dashboard with response time percentiles, error rate, VU count and requests/sec panels
+- `grafana-provisioning/datasources/influxdb.yml` — auto-provisions InfluxDB datasource in Grafana on stack startup
+- `grafana-provisioning/dashboards/dashboard.yml` — auto-provisions k6 dashboard in Grafana on stack startup
+- `docs/screenshots/` — folder for Grafana dashboard screenshots
+
+### Changed
+- `docker-compose.yml` — added Grafana volume mounts for provisioning; dashboard and datasource now load automatically on `docker compose up`
+- `README.md` — added Grafana dashboard section, soak test run instructions, full project structure tree
+
+### Notes
+- Thresholds across all tests are baseline values — tuning based on observed metrics planned for v0.4.1
+- `teardown()` functions not yet added to test files
+- CI integration not yet implemented — coming in v1.0.0
+
+---
+
+## [0.3.0] - 2025-04-09
 
 ### Added
 - `utils/http-client.js` — reusable HTTP wrapper with `get()`, `post()`, `defaultPizzaPayload()` and `customPizzaPayload()` helpers
@@ -19,12 +39,11 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - `config/options.js` — removed `BASE_URL` export (moved to `config/env.js`); added `soakOptions` placeholder for next stage
 - All test files refactored to import from `utils/` and `config/env.js` — eliminated duplicated HTTP and check logic
-- Auth token now sourced from `ENV.AUTH_TOKEN` via environment variable instead of hardcoded placeholder
+- Auth token now sourced from `ENV.AUTH_TOKEN` via environment variable — uses `Bearer` prefix
 
 ### Notes
 - Soak test file not yet created — options placeholder added, full implementation in v0.4.0
-- Grafana dashboard not yet version-controlled — coming in v0.4.0
-- InfluxDB output not yet wired into `run-tests.sh` with dashboard provisioning
+- Grafana dashboard not yet version-controlled — added in v0.4.0
 
 ---
 
