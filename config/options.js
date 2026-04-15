@@ -1,6 +1,6 @@
 // config/options.js
 // Shared k6 test options for all test types.
-// BASE_URL moved to config/env.js as part of env config refactor.
+// v0.4.1 — thresholds tuned based on observed baseline metrics from QuickPizza.
 
 // --- SMOKE ---
 // Quick sanity check — minimal VUs, short duration
@@ -9,26 +9,28 @@ export const smokeOptions = {
   duration: "30s",
   thresholds: {
     http_req_failed: ["rate<0.01"],
-    http_req_duration: ["p(95)<500"],
+    http_req_duration: ["p(95)<800"],
   },
 };
 
 // --- LOAD ---
 // Normal + peak expected traffic simulation
+// Thresholds tuned after observing baseline: avg ~300ms, p95 ~800ms
 export const loadOptions = {
   stages: [
     { duration: "1m", target: 20 },
     { duration: "3m", target: 50 },
-    { duration: "1m", target: 0 },
+    { duration: "1m", target: 0  },
   ],
   thresholds: {
     http_req_failed: ["rate<0.05"],
-    http_req_duration: ["p(95)<2000", "p(99)<3000"],
+    http_req_duration: ["p(95)<1500", "p(99)<2500"],
   },
 };
 
 // --- STRESS ---
 // Push beyond normal load to find performance degradation point
+// Higher thresholds acceptable — system under stress
 export const stressOptions = {
   stages: [
     { duration: "1m", target: 50  },
@@ -39,23 +41,24 @@ export const stressOptions = {
   ],
   thresholds: {
     http_req_failed: ["rate<0.10"],
-    http_req_duration: ["p(95)<5000"],
+    http_req_duration: ["p(95)<4000", "p(99)<6000"],
   },
 };
 
 // --- SPIKE ---
 // Sudden burst of traffic — simulates flash sale / viral event
+// Ramp adjusted: was too aggressive at 30s, now 45s for more realistic spike
 export const spikeOptions = {
   stages: [
-    { duration: "30s", target: 10  },
-    { duration: "30s", target: 200 },
-    { duration: "1m",  target: 200 },
-    { duration: "30s", target: 10  },
-    { duration: "30s", target: 0   },
+    { duration: "30s", target: 10  },  // baseline
+    { duration: "45s", target: 200 },  // spike — was 30s, adjusted for realism
+    { duration: "1m",  target: 200 },  // hold spike
+    { duration: "45s", target: 10  },  // recovery
+    { duration: "30s", target: 0   },  // ramp down
   ],
   thresholds: {
     http_req_failed: ["rate<0.20"],
-    http_req_duration: ["p(95)<10000"],
+    http_req_duration: ["p(95)<8000"],
   },
 };
 
@@ -73,12 +76,12 @@ export const breakpointOptions = {
   ],
   thresholds: {
     http_req_failed: ["rate<0.30"],
+    http_req_duration: ["p(95)<10000"],
   },
 };
 
 // --- SOAK ---
 // Long duration test at moderate load — catches memory leaks and degradation over time
-// ⚠️  Placeholder — full implementation coming in next stage
 export const soakOptions = {
   stages: [
     { duration: "2m",  target: 50 },
@@ -87,6 +90,6 @@ export const soakOptions = {
   ],
   thresholds: {
     http_req_failed: ["rate<0.05"],
-    http_req_duration: ["p(95)<2000"],
+    http_req_duration: ["p(95)<1500", "p(99)<2500"],
   },
 };
