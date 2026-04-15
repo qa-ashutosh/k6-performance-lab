@@ -41,15 +41,15 @@ A professional performance testing suite built with [Grafana k6](https://k6.io/)
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────┐
 │                   Local Stack                    │
 │                                                  │
-│   k6 (local) ──► QuickPizza (Docker :3333)      │
+│   k6 (local) ──► QuickPizza (Docker :3333)       │
 │        │                                         │
-│        └──► InfluxDB (Docker :8086)              │
-│                    │                             │
-│                    └──► Grafana (Docker :3000)   │
-└─────────────────────────────────────────────────┘
+│        └───► InfluxDB (Docker :8086)             │
+│                   │                              │
+│                   └──► Grafana (Docker :3000)    │
+└──────────────────────────────────────────────────┘
 ```
 
 ---
