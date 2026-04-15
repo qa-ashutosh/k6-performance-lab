@@ -1,0 +1,34 @@
+# .github/workflows/k6-smoke.yml
+# Runs smoke test on every push and pull request to main.
+# Validates that the test scripts are syntactically correct and
+# the QuickPizza public endpoint is reachable.
+
+name: k6 Smoke Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke-test:
+    name: Run Smoke Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run smoke test against public QuickPizza
+        env:
+          BASE_URL: https://quickpizza.grafana.com
+          AUTH_TOKEN: ${{ secrets.QUICKPIZZA_TOKEN }}
+        run: |
+          k6 run \
+            -e BASE_URL=$BASE_URL \
+            -e AUTH_TOKEN=$AUTH_TOKEN \
+            tests/smoke-test.js

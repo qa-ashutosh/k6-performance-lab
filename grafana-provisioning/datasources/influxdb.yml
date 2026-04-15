@@ -1,14 +1,16 @@
 # grafana-provisioning/datasources/influxdb.yml
-# Auto-provisions InfluxDB as a datasource in Grafana on startup.
-# No manual setup needed — just run docker compose up.
+# Auto-provisions InfluxDB as datasource on Grafana startup.
+# Name MUST match the datasource name in k6-dashboard.json exactly.
 
 apiVersion: 1
 
 datasources:
-  - name: InfluxDB
+  - name: k6
     type: influxdb
     access: proxy
     url: http://influxdb:8086
     database: k6
     isDefault: true
     editable: true
+    jsonData:
+      httpMode: GET

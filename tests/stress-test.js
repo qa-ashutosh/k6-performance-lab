@@ -3,7 +3,7 @@
 // Ramps up to 200 VUs across 5 stages.
 // Watch for: increased error rates, response time spikes, timeouts.
 
-import { sleep } from "k6";
+import { sleep, group } from "k6";
 import { stressOptions } from "../config/options.js";
 import { get, post, defaultPizzaPayload, customPizzaPayload } from "../utils/http-client.js";
 import { checkHomepage, checkPizzaResponse, checkCustomResponse } from "../utils/checks.js";
@@ -28,4 +28,17 @@ export default function () {
   checkCustomResponse(recRes);
 
   sleep(1);
+}
+
+// teardown — runs once after all VUs finish
+export function teardown() {
+  group("stress-test | Summary", () => {
+    console.log("Type       : Stress");
+    console.log("VUs        : 50 → 100 → 150 → 200 → 0");
+    console.log("Duration   : ~8m across 5 stages");
+    console.log("Endpoints  : GET /  |  POST /api/pizza (default + custom)");
+    console.log("Thresholds : p(95) < 4000ms  |  p(99) < 6000ms  |  error rate < 10%");
+    console.log("Watch for  : Error rate spikes and response time degradation per stage");
+    console.log("Dashboard  : http://localhost:3000");
+  });
 }

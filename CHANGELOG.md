@@ -7,23 +7,57 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.0.0] - 2025-04-15
+
+### Added
+- `.github/workflows/k6-smoke.yml` — GitHub Actions CI runs smoke test on every push and pull request to main
+- `CONTRIBUTING.md` — branch naming, commit conventions, PR process and code style guidelines
+
+### Changed
+- `README.md` — full polish: CI badge, architecture diagram, thresholds summary table, screenshots section, roadmap, clone instructions
+- `README.md` — version badge updated from `0.4.1` to `1.0.0`
+- `CHANGELOG.md` — promoted to v1.0.0
+
+### Notes
+- Grafana upgrade from `8.5.21` to `latest` with timeseries panel migration planned for v1.1.0
+- TypeScript migration planned for v1.2.0
+
+---
+
+## [0.4.1] - 2025-04-13
+
+### Fixed
+- `dashboards/k6-dashboard.json` — rebuilt using Grafana query builder format; fixes "No data" issue caused by unresolved `$__interval` variable in raw SQL mode
+- `docker-compose.yml` — pinned Grafana to `8.5.21`; latest Grafana (v10+) removed the `graph` panel type breaking auto-provisioned dashboards
+- `grafana-provisioning/datasources/influxdb.yml` — simplified datasource name to `k6`; added `httpMode: GET`
+- `config/options.js` — thresholds tuned based on observed baseline metrics; spike ramp adjusted from 30s to 45s
+- `tests/spike-test.js` — spike ramp duration adjusted for realistic behavior
+- `config/env.js` — removed hardcoded token fallback, replaced with empty string
+
+### Added
+- `teardown()` function added to all 6 test files with `group()` formatted summary output
+- `utils/checks.js` — failure logging with status code and duration
+- `README.md` — static shields.io badges
+
+---
+
 ## [0.4.0] - 2025-04-13
 
 ### Added
-- `tests/soak-test.js` — long duration endurance test (34 min at 50 VUs) to detect memory leaks and performance degradation over time
-- `dashboards/k6-dashboard.json` — importable Grafana dashboard with response time percentiles, error rate, VU count and requests/sec panels
-- `grafana-provisioning/datasources/influxdb.yml` — auto-provisions InfluxDB datasource in Grafana on stack startup
-- `grafana-provisioning/dashboards/dashboard.yml` — auto-provisions k6 dashboard in Grafana on stack startup
+- `tests/soak-test.js` — long duration endurance test (34 min at 50 VUs)
+- `dashboards/k6-dashboard.json` — importable Grafana dashboard
+- `grafana-provisioning/datasources/influxdb.yml` — auto-provisions InfluxDB datasource
+- `grafana-provisioning/dashboards/dashboard.yml` — auto-provisions k6 dashboard
 - `docs/screenshots/` — folder for Grafana dashboard screenshots
 
 ### Changed
-- `docker-compose.yml` — added Grafana volume mounts for provisioning; dashboard and datasource now load automatically on `docker compose up`
-- `README.md` — added Grafana dashboard section, soak test run instructions, full project structure tree
+- `docker-compose.yml` — Grafana volume mounts for auto-provisioning
+- `README.md` — Grafana dashboard section, full project structure tree
 
 ### Notes
-- Thresholds across all tests are baseline values — tuning based on observed metrics planned for v0.4.1
-- `teardown()` functions not yet added to test files
-- CI integration not yet implemented — coming in v1.0.0
+- Thresholds across all tests are baseline values — tuned in v0.4.1
+- `teardown()` functions not yet added — added in v0.4.1
+- CI not yet implemented — added in v1.0.0
 
 ---
 
@@ -31,37 +65,26 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 - `utils/http-client.js` — reusable HTTP wrapper with `get()`, `post()`, `defaultPizzaPayload()` and `customPizzaPayload()` helpers
-- `utils/checks.js` — shared check functions (`checkHomepage`, `checkPizzaResponse`, `checkPizzaStructure`, `checkCustomResponse`)
-- `config/env.js` — centralised environment config reading from `__ENV` with safe fallback defaults
-- `.env.example` — committed safe template showing all required environment variables
-- `run-tests.sh` — shell wrapper that loads `.env` and runs k6 with any arguments passed
+- `utils/checks.js` — shared check functions
+- `config/env.js` — centralised environment config with safe fallback defaults
+- `.env.example` — committed safe template
+- `run-tests.sh` — shell wrapper that loads `.env`
 
 ### Changed
-- `config/options.js` — removed `BASE_URL` export (moved to `config/env.js`); added `soakOptions` placeholder for next stage
-- All test files refactored to import from `utils/` and `config/env.js` — eliminated duplicated HTTP and check logic
-- Auth token now sourced from `ENV.AUTH_TOKEN` via environment variable — uses `Bearer` prefix
-
-### Notes
-- Soak test file not yet created — options placeholder added, full implementation in v0.4.0
-- Grafana dashboard not yet version-controlled — added in v0.4.0
+- All test files refactored to use utils and env config
+- Auth token uses `Bearer` prefix via `ENV.AUTH_TOKEN`
 
 ---
 
 ## [0.2.0] - 2025-04-07
 
 ### Added
-- `tests/stress-test.js` — ramps to 200 VUs across 5 stages to identify performance degradation point
-- `tests/spike-test.js` — simulates sudden traffic burst from 10 to 200 VUs to test spike recovery
-- `tests/breakpoint-test.js` — continuously ramps to 300 VUs to find absolute system capacity limit
+- `tests/stress-test.js` — ramps to 200 VUs across 5 stages
+- `tests/spike-test.js` — sudden burst from 10 to 200 VUs
+- `tests/breakpoint-test.js` — ramps to 300 VUs to find system limit
 
 ### Fixed
-- `config/options.js` — added missing thresholds to `loadOptions` (`p(95)<2000`, `p(99)<3000`, error rate `<5%`)
-
-### Notes
-- Auth token still hardcoded as placeholder across all test files — moved to env config in v0.3.0
-- HTTP request logic duplicated across test files — reusable utils added in v0.3.0
-- Soak test not yet implemented
-- Breakpoint test should not be run in CI — manual execution only
+- `config/options.js` — added missing thresholds to `loadOptions`
 
 ---
 
@@ -69,16 +92,11 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 - `docker-compose.yml` — local stack with QuickPizza, InfluxDB (v1.11), and Grafana
-- `tests/smoke-test.js` — smoke test with 5 VUs / 30s; validates homepage and `/api/pizza` POST endpoint with deep response structure checks
-- `tests/load-test.js` — load test ramping to 50 VUs over 5 minutes; covers regular and custom pizza request scenarios
-- `config/options.js` — shared k6 options (smokeOptions, loadOptions) and BASE_URL config
-- `README.md` — project overview, stack details, setup and run instructions
-- `.gitignore` — excludes k6 output files, OS artifacts and editor configs
-
-### Notes
-- Auth token hardcoded as placeholder in test files — moved to env config in v0.3.0
-- Thresholds on smoke test only; load test thresholds added in v0.2.0
-- Stress, spike, soak and breakpoint tests not yet implemented
+- `tests/smoke-test.js` — smoke test with deep response structure validation
+- `tests/load-test.js` — load test with regular and custom pizza scenarios
+- `config/options.js` — shared k6 options
+- `README.md` — project overview and setup instructions
+- `.gitignore` — excludes k6 output files and editor configs
 
 ---
 
